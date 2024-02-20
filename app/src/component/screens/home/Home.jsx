@@ -1,50 +1,31 @@
-
 import styles from './Home.module.css'
-import {cars as carsData} from './cars.data.js'
+
 import CarItem from "./car-item/CarItem.jsx";
-import {useContext, useEffect, useState} from "react";
+
 import CreateCarForm from "./create-car-form/CreateCarForm.jsx";
 import {CarService} from "../../../services/car.service.js";
-import {AuthContext} from "../../../providers/AuthProvider.jsx";
+
+import {useQuery} from "@tanstack/react-query";
+import Header from "../../ui/Header.jsx";
+import Catalog from "../../ui/Catalog.jsx";
 
 
-const Home = () =>{
+const Home = () => {
 
-	const [cars, setCars] = useState([])
+	const {data, isLoading} = useQuery({
+		queryKey: ['cars'],
+		queryFn: () =>
+			CarService.getAll()
+	})
 
-
-	useEffect(() => {
-		const fetchData = async () =>{
-			const data = await CarService.getAll()
-
-			setCars(data)
-		}
-		fetchData()
-	}, [])
-
-	const {user, setUser} = useContext(AuthContext)
+	if (isLoading) return <p>Loading...</p>
 
 	return (
 		<div>
 			<h1>Cars catalog</h1>
-
-			{user ? (
-				<>
-					<h2>Welcome, {user.name}</h2>
-					<button onClick={() => setUser(null)}> logout</button>
-				</>
-			) : (
-				<button onClick={() => setUser({name: 'Mark'})} >login</button>
-			)}
-
-			<CreateCarForm setCars={setCars}/>
-
-			<div>
-				{cars.length ? cars.map(car => (
-					<CarItem key={car.id} car={car} />
-				)) : <p> There are no cars </p> }
-			</div>
-
+			<Header />
+			<CreateCarForm/>
+			<Catalog data={data}/>
 		</div>
 	)
 }

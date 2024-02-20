@@ -1,52 +1,39 @@
 import styles from './CreateCarForm.module.css'
-import {useState} from "react";
+
 import {useForm} from "react-hook-form";
+import {useCreateCar} from "./useCreateCar.js";
 
 
-const clearData = {
-	name: '',
-	price: '',
-	image: ''
-}
+const CreateCarForm = () => {
 
-const CreateCarForm = ({setCars}) =>{
-
-	const [data, setData] = useState(clearData)
-
-	const {register, reset} = useForm({
+	const {
+		register, reset, handleSubmit, formState: {errors}
+	} = useForm({
 		mode: "onChange"
 	})
 
+	const {createCar} = useCreateCar(reset)
 
-	const createCar = (e) =>{
-		e.preventDefault()
-
-		setCars(prev=> [{id: prev.length+1, ...data}, ...prev ])
-
-		setData(clearData)
-	}
-
-	return <form className={styles.form}>
+	return <form className={styles.form} onSubmit={handleSubmit(createCar)}>
 		<input
+			{...register('name', {required: 'Name is required'})}
 			placeholder={"Name"}
-			onChange={e => setData(prev => ({...prev, name: e.target.value
-			}))}
-			value = {data.name}
-		/>
-		<input
-			placeholder={"Price"}
-			onChange={e => setData(prev => ({...prev, price: e.target.value
-			}))}
-			value = {data.price}
-		/>
-		<input
-			placeholder={"Image"}
-			onChange={e => setData(prev => ({...prev, image: e.target.value
-			}))}
-			value = {data.image}
 		/>
 
-		<button className={styles.btn} onClick={e => createCar(e)} >Create</button>
+		{errors?.name?.message && <p style={{color: 'red'}}> Name is required</p>}
+
+		<input
+			{...register('price', {required: true})}
+			placeholder={"Price"}
+
+		/>
+		<input
+			{...register('image', {required: true})}
+			placeholder={"Image"}
+
+		/>
+
+		<button className={styles.btn}>Create</button>
 	</form>
 }
 
